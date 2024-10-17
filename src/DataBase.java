@@ -1,10 +1,13 @@
 import enums.METACOMMANDRESULT;
 import enums.PREPARERESULT;
+import enums.ROLES;
 import enums.STATEMENT;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
+import java.util.stream.Collectors;
 
 /**
  * A class which creates and runs a little database
@@ -88,6 +91,10 @@ public class DataBase {
                 command.command = STATEMENT.STATEMENT_SELECT;
                 yield PREPARERESULT.PREPARE_SUCCESS;
             }
+            case "select_role" -> {
+                command.command = STATEMENT.STATEMENT_SELECT_ROLE;
+                yield PREPARERESULT.PREPARE_SUCCESS;
+            }
             case "update" -> {
                 command.command = STATEMENT.STATEMENT_UPDATE;
                 yield PREPARERESULT.PREPARE_SUCCESS;
@@ -118,6 +125,8 @@ public class DataBase {
         switch (command.command) {
             case STATEMENT_INSERT -> handleInsert(line);
             case STATEMENT_SELECT -> handleSelect(line);
+            case STATEMENT_SELECT_ROLE ->
+                    select(ROLES.which(new Scanner(System.in).nextLine())).forEach(System.out::println);
             case STATEMENT_DELETE, STATEMENT_UPDATE -> handleDeleteAndUpdate(command);
             case STATEMENT_PRINT -> printAll();
             case STATEMENT_SAVE -> saveFile();
@@ -219,11 +228,8 @@ public class DataBase {
             String email = inserts[2];
             if (inserts.length == 4) {
                 String role = inserts[3];
-                if (email == null || !email.contains("@")) {
-                    System.out.println("Invalid email address");
-                    return null;
-                }
-                return new User(id, name, email, role);
+                ROLES roles = ROLES.which(role.toLowerCase());
+                return new User(id, name, email, roles);
             }
             if (email == null || !email.contains("@")) {
                 System.out.println("Invalid email address");
@@ -319,6 +325,11 @@ public class DataBase {
             }
         }
         return null;
+    }
+
+    public List<User> select(ROLES role) {
+        System.out.println("Please enter a role:");
+        return users.stream().filter(user -> user.getRole() == role).collect(Collectors.toList());
     }
 
     /**

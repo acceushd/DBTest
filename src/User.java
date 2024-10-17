@@ -1,3 +1,5 @@
+import enums.ROLES;
+
 /**
  * Creates a User with a unique ID, a Username and an email-address
  */
@@ -5,7 +7,7 @@ public class User {
     final private int ID;
     private String userName;
     private String email;
-    private String role;
+    private ROLES role;
 
 
     /**
@@ -16,14 +18,14 @@ public class User {
      * @param email    String
      * @param role     String
      */
-    public User(int ID, String userName, String email, String role) {
+    public User(int ID, String userName, String email, ROLES role) {
         if (userName == null || userName.trim().isEmpty()) {
             throw new IllegalArgumentException("Username cannot be null or empty");
         }
         if (isNotValidEmail(email)) {
             throw new IllegalArgumentException("Invalid email address");
         }
-        if (role == null || role.trim().isEmpty()) {
+        if (role == null) {
             throw new IllegalArgumentException("Role cannot be null or empty");
         }
         this.ID = ID;
@@ -40,7 +42,7 @@ public class User {
      * @param email    String
      */
     public User(int ID, String userName, String email) {
-        this(ID, userName, email, "user");
+        this(ID, userName, email, ROLES.USER);
     }
 
     public int getID() {
@@ -55,7 +57,7 @@ public class User {
         return email;
     }
 
-    public String getRole() {
+    public ROLES getRole() {
         return role;
     }
 
@@ -73,7 +75,7 @@ public class User {
         this.userName = userName;
     }
 
-    public void setRole(String role) {
+    public void setRole(ROLES role) {
         this.role = role;
     }
 
