@@ -26,7 +26,7 @@ public class DataBase {
     /**
      * Creates and runs the Database
      */
-    public void create() {
+    public void start() {
         Scanner scanner = new Scanner(System.in);
         while (true) {
             printBuffer();
@@ -210,6 +210,14 @@ public class DataBase {
             int id = Integer.parseInt(inserts[0]);
             String name = inserts[1];
             String email = inserts[2];
+            if (inserts.length == 4) {
+                String role = inserts[3];
+                if (email == null || !email.contains("@")) {
+                    System.out.println("Invalid email address");
+                    return null;
+                }
+                return new User(id, name, email, role);
+            }
             if (email == null || !email.contains("@")) {
                 System.out.println("Invalid email address");
                 return null;
@@ -287,7 +295,7 @@ public class DataBase {
                 System.out.println("Please enter a email:");
                 yield select(scanner.nextLine());
             }
-            default -> new User(0, "null", "null");
+            default -> null;
         };
     }
 
@@ -303,7 +311,7 @@ public class DataBase {
                 return user;
             }
         }
-        return new User(0, "null", "null");
+        return null;
     }
 
     /**
@@ -326,6 +334,6 @@ public class DataBase {
                 }
             }
         }
-        return new User(0, "null", "null");
+        return null;
     }
 }
