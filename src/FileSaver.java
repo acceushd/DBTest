@@ -9,7 +9,7 @@ public class FileSaver {
      *
      * @return Returns if it was successful
      */
-    public boolean fileCreator(FileWrapper file) {
+    public boolean fileCreator(FileWrapper fileWrapper) {
         String path;
         String separator = File.separator;
         String os = System.getProperty("os.name").toLowerCase();
@@ -31,11 +31,12 @@ public class FileSaver {
             }
             if (isDirectoryEmpty(path)) {
                 File newFile = new File(path + separator + "db1.json");
+                fileWrapper.file = newFile;
                 return newFile.createNewFile();
             } else {
                 int number = getHighestDataBaseNumber(path) + 1;
                 File newFile = new File(path + separator + "db" + number + ".json");
-                file.file = newFile;
+                fileWrapper.file = newFile;
                 return newFile.createNewFile();
             }
         } catch (IOException e) {
@@ -46,40 +47,18 @@ public class FileSaver {
 
     public boolean fileWriter(User user, FileWrapper file) {
         String path = file.file.getAbsolutePath();
+        System.out.println(path);
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         String json = gson.toJson(user);
         try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(path, true))) {
-            if (new java.io.File(path).length() == 0) {
-                bufferedWriter.write("[");
-            } else {
-                bufferedWriter.write(",");
-            }
             bufferedWriter.write(json);
+            bufferedWriter.write(",");
             bufferedWriter.newLine();
         } catch (IOException e) {
             System.err.println(e.getMessage());
             return false;
         }
-        closeJsonArray(path);
         return true;
-    }
-
-    private void closeJsonArray(String fileName) {
-        try (BufferedReader reader = new BufferedReader(new FileReader(fileName))) {
-            StringBuilder content = new StringBuilder();
-            String line;
-            while ((line = reader.readLine()) != null) {
-                content.append(line);
-            }
-            if (!content.isEmpty()) {
-                content.append("]");
-                try (BufferedWriter writer = new BufferedWriter(new FileWriter(fileName, true))) {
-                    writer.write(content.toString());
-                }
-            }
-        } catch (IOException e) {
-            System.err.println(e.getMessage());
-        }
     }
 
     private boolean isDirectoryEmpty(String directoryPath) {

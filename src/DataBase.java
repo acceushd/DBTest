@@ -2,6 +2,7 @@ import enums.METACOMMANDRESULT;
 import enums.PREPARERESULT;
 import enums.STATEMENT;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -11,7 +12,7 @@ import java.util.Scanner;
 public class DataBase {
 
     ArrayList<User> users = new ArrayList<>();
-    FileWrapper file;
+    FileWrapper file = new FileWrapper(new File(""));
 
     /**
      * Creates and runs the Database
@@ -149,7 +150,6 @@ public class DataBase {
             case STATEMENT_SAVE -> {
                 FileSaver fileSaver = new FileSaver();
                 fileSaver.fileCreator(file);
-                System.out.printf("File: %s%n", file);
                 for (User user : users) {
                     if (user != null) {
                         if (!fileSaver.fileWriter(user, file)) {
