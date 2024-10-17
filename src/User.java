@@ -8,6 +8,14 @@ public class User {
     private String role;
 
 
+    /**
+     * Creates a new User with a unique ID, Username, email and Role
+     *
+     * @param ID       Int
+     * @param userName String
+     * @param email    String
+     * @param role     String
+     */
     public User(int ID, String userName, String email, String role) {
         if (userName == null || userName.trim().isEmpty()) {
             throw new IllegalArgumentException("Username cannot be null or empty");
@@ -24,6 +32,13 @@ public class User {
         this.role = role;
     }
 
+    /**
+     * Creates a User with a unique ID, Username, email and the user Role
+     *
+     * @param ID       Int
+     * @param userName String
+     * @param email    String
+     */
     public User(int ID, String userName, String email) {
         this(ID, userName, email, "user");
     }
