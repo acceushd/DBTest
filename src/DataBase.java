@@ -116,48 +116,11 @@ public class DataBase {
      */
     public void execute(CommandWrapper command, String line) {
         switch (command.command) {
-            case STATEMENT_INSERT -> {
-                int index = line.indexOf(" ");
-                if (index == -1) {
-                    System.out.println("No insert statement");
-                } else {
-                    insert(line.substring(index).trim());
-                }
-            }
-            case STATEMENT_SELECT -> {
-                User user = selectChooser();
-                System.out.println("What do you want to do? (delete, print, update)");
-                Scanner scanner = new Scanner(System.in);
-                CommandWrapper commandNew = new CommandWrapper(STATEMENT.STATEMENT_NULL);
-                String newLine = scanner.nextLine();
-                switch (prepareStatement(newLine, commandNew)) {
-                    case PREPARE_SUCCESS -> execute(commandNew, user);
-                    case PREPARE_UNRECOGNIZED_STATEMENT ->
-                            System.out.printf("Unrecognized keyword at start of '%s'.%n", line);
-                }
-            }
-            case STATEMENT_DELETE, STATEMENT_UPDATE -> {
-                User user = selectChooser();
-                execute(command, user);
-            }
-            case STATEMENT_PRINT -> {
-                for (User user : users) {
-                    if (user != null) {
-                        System.out.println(user);
-                    }
-                }
-            }
-            case STATEMENT_SAVE -> {
-                FileSaver fileSaver = new FileSaver();
-                fileSaver.fileCreator(file);
-                for (User user : users) {
-                    if (user != null) {
-                        if (!fileSaver.fileWriter(user, file)) {
-                            System.err.printf("Could not save User %s%n", user);
-                        }
-                    }
-                }
-            }
+            case STATEMENT_INSERT -> handleInsert(line);
+            case STATEMENT_SELECT -> handleSelect(line);
+            case STATEMENT_DELETE, STATEMENT_UPDATE -> handleDeleteAndUpdate(command);
+            case STATEMENT_PRINT -> printAll();
+            case STATEMENT_SAVE -> saveFile();
             default -> throw new IllegalStateException("Unexpected value: " + command);
         }
     }
@@ -189,6 +152,53 @@ public class DataBase {
                 }
             }
         }
+    }
+
+    private void handleInsert(String line) {
+        int index = line.indexOf(" ");
+        if (index == -1) {
+            System.out.println("No insert statement");
+        } else {
+            insert(line.substring(index).trim());
+        }
+    }
+
+    private void handleSelect(String line) {
+        User user = selectChooser();
+        System.out.println("What do you want to do? (delete, print, update)");
+        Scanner scanner = new Scanner(System.in);
+        CommandWrapper commandNew = new CommandWrapper(STATEMENT.STATEMENT_NULL);
+        String newLine = scanner.nextLine();
+        switch (prepareStatement(newLine, commandNew)) {
+            case PREPARE_SUCCESS -> execute(commandNew, user);
+            case PREPARE_UNRECOGNIZED_STATEMENT -> System.out.printf("Unrecognized keyword at start of '%s'.%n", line);
+        }
+    }
+
+    private void handleDeleteAndUpdate(CommandWrapper command) {
+        User user = selectChooser();
+        execute(command, user);
+    }
+
+    private void printAll() {
+        for (User user : users) {
+            if (user != null) {
+                System.out.println(user);
+            }
+        }
+    }
+
+    private void saveFile() {
+        FileSaver fileSaver = new FileSaver();
+        fileSaver.fileCreator(file);
+        for (User user : users) {
+            if (user != null) {
+                if (!fileSaver.fileWriter(user, file)) {
+                    System.err.printf("Could not save User %s%n", user);
+                }
+            }
+        }
+
     }
 
     /**
