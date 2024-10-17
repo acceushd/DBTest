@@ -1,4 +1,6 @@
-public enum PrepareResult {
+package enums;
+
+public enum PREPARERESULT {
     PREPARE_SUCCESS,
     PREPARE_UNRECOGNIZED_STATEMENT
 }

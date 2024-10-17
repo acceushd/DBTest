@@ -1,3 +1,5 @@
+package enums;
+
 public enum STATEMENT {
     STATEMENT_INSERT,
     STATEMENT_SELECT,

@@ -1,3 +1,5 @@
+import enums.*;
+
 import java.util.Scanner;
 
 public class Main {
@@ -76,29 +78,29 @@ public class Main {
      * @return It returns whether the command was successfully declared or if it was
      * not recognized
      */
-    public static PrepareResult prepareStatement(String line, CommandWrapper command) {
+    public static PREPARERESULT prepareStatement(String line, CommandWrapper command) {
         return switch (line.split(" ")[0]) {
             case "insert" -> {
                 command.command = STATEMENT.STATEMENT_INSERT;
-                yield PrepareResult.PREPARE_SUCCESS;
+                yield PREPARERESULT.PREPARE_SUCCESS;
             }
             case "select" -> {
                 command.command = STATEMENT.STATEMENT_SELECT;
-                yield PrepareResult.PREPARE_SUCCESS;
+                yield PREPARERESULT.PREPARE_SUCCESS;
             }
             case "update" -> {
                 command.command = STATEMENT.STATEMENT_UPDATE;
-                yield PrepareResult.PREPARE_SUCCESS;
+                yield PREPARERESULT.PREPARE_SUCCESS;
             }
             case "delete" -> {
                 command.command = STATEMENT.STATEMENT_DELETE;
-                yield PrepareResult.PREPARE_SUCCESS;
+                yield PREPARERESULT.PREPARE_SUCCESS;
             }
             case "print" -> {
                 command.command = STATEMENT.STATEMENT_PRINT;
-                yield PrepareResult.PREPARE_SUCCESS;
+                yield PREPARERESULT.PREPARE_SUCCESS;
             }
-            default -> PrepareResult.PREPARE_UNRECOGNIZED_STATEMENT;
+            default -> PREPARERESULT.PREPARE_UNRECOGNIZED_STATEMENT;
         };
     }
 
