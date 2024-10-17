@@ -1,12 +1,15 @@
-import java.io.File;
-import java.io.IOException;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
+import java.io.*;
 
 public class FileSaver {
     /**
      * Creates a new File per Scheme db[0-9]*[1-9]
+     *
      * @return Returns if it was successful
      */
-    public boolean fileCreator() {
+    public boolean fileCreator(FileWrapper file) {
         String path;
         String separator = File.separator;
         String os = System.getProperty("os.name").toLowerCase();
@@ -32,11 +35,50 @@ public class FileSaver {
             } else {
                 int number = getHighestDataBaseNumber(path) + 1;
                 File newFile = new File(path + separator + "db" + number + ".json");
+                file.file = newFile;
                 return newFile.createNewFile();
             }
         } catch (IOException e) {
             System.err.println(e.getMessage());
             return false;
+        }
+    }
+
+    public boolean fileWriter(User user, FileWrapper file) {
+        String path = file.file.getAbsolutePath();
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        String json = gson.toJson(user);
+        try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(path, true))) {
+            if (new java.io.File(path).length() == 0) {
+                bufferedWriter.write("[");
+            } else {
+                bufferedWriter.write(",");
+            }
+            bufferedWriter.write(json);
+            bufferedWriter.newLine();
+        } catch (IOException e) {
+            System.err.println(e.getMessage());
+            return false;
+        }
+        closeJsonArray(path);
+        return true;
+    }
+
+    private void closeJsonArray(String fileName) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(fileName))) {
+            StringBuilder content = new StringBuilder();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                content.append(line);
+            }
+            if (!content.isEmpty()) {
+                content.append("]");
+                try (BufferedWriter writer = new BufferedWriter(new FileWriter(fileName, true))) {
+                    writer.write(content.toString());
+                }
+            }
+        } catch (IOException e) {
+            System.err.println(e.getMessage());
         }
     }
 

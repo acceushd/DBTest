@@ -11,17 +11,7 @@ import java.util.Scanner;
 public class DataBase {
 
     ArrayList<User> users = new ArrayList<>();
-
-    /**
-     * A wrapper class for the command which can be manipulated
-     */
-    public static class CommandWrapper {
-        public STATEMENT command;
-
-        public CommandWrapper(STATEMENT command) {
-            this.command = command;
-        }
-    }
+    FileWrapper file;
 
     /**
      * Creates and runs the Database
@@ -158,8 +148,15 @@ public class DataBase {
             }
             case STATEMENT_SAVE -> {
                 FileSaver fileSaver = new FileSaver();
-                System.out.println(fileSaver.fileCreator());
-
+                fileSaver.fileCreator(file);
+                System.out.printf("File: %s%n", file);
+                for (User user : users) {
+                    if (user != null) {
+                        if (!fileSaver.fileWriter(user, file)) {
+                            System.err.printf("Could not save User %s%n", user);
+                        }
+                    }
+                }
             }
             default -> throw new IllegalStateException("Unexpected value: " + command);
         }
