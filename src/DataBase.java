@@ -1,7 +1,4 @@
-import enums.METACOMMANDRESULT;
-import enums.PREPARERESULT;
-import enums.ROLES;
-import enums.STATEMENT;
+import enums.*;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -16,6 +13,7 @@ public class DataBase {
 
     ArrayList<User> users = new ArrayList<>();
     FileWrapper file = new FileWrapper(new File(""));
+    FileManipulator fileManipulator = new FileManipulator();
 
     /**
      * Creates and runs the Database
@@ -60,16 +58,67 @@ public class DataBase {
      * @return It returns a Statement if the Command was a success or if it was unrecognized
      */
     public METACOMMANDRESULT doMetaCommand(String command) {
-        if (command.contains("exit")) {
-            if (command.length() > 4) {
-                int index = command.indexOf("t");
-                System.out.printf("Message: %s", command.substring(index + 1).trim());
-            }
-            System.exit(0);
+        METASTATEMENT metastatement = prepareMetaStatement(command);
+        if (metastatement != null) {
+            executeMetaCommand(metastatement, command);
             return METACOMMANDRESULT.METACOMMANDSUCCESS;
         } else {
             return METACOMMANDRESULT.METACOMMANDUNRECOGNIZED;
         }
+    }
+
+
+    public void executeMetaCommand(METASTATEMENT command, String line) {
+        switch (command) {
+            case META_EXIT -> {
+                if (line.substring(1).length() > 4) {
+                    int index = line.indexOf("t");
+                    System.out.printf("Message: %s", line.substring(index + 1).trim());
+                }
+                System.exit(0);
+            }
+            case META_OPEN -> {
+                int index = line.indexOf(" ");
+                if (index < 0) {
+                    System.err.printf("Message: %s is not a correct Path%n", line);
+                    return;
+                }
+                file.file = fileManipulator.fileOPen(line.substring(index + 1).trim());
+            }
+            case META_IMPORT -> {
+                int index = line.indexOf(" ");
+                if (index < 0) {
+                    System.err.printf("Message: %s is not a correct Path%n", line);
+                    return;
+                }
+                file.file = fileManipulator.fileImport(line.substring(index + 1).trim());
+            }
+            case META_SAVE -> {
+            }
+            case META_CLONE -> {
+            }
+            case META_PRINT -> {
+            }
+            default -> throw new IllegalArgumentException("Unknown command: " + command);
+        }
+    }
+
+
+    public METASTATEMENT prepareMetaStatement(String command) {
+        if (command.contains("exit")) {
+            return METASTATEMENT.META_EXIT;
+        } else if (command.contains("import")) {
+            return METASTATEMENT.META_IMPORT;
+        } else if (command.contains("open")) {
+            return METASTATEMENT.META_OPEN;
+        } else if (command.contains("save")) {
+            return METASTATEMENT.META_SAVE;
+        } else if (command.contains("print")) {
+            return METASTATEMENT.META_PRINT;
+        } else if (command.contains("clone")) {
+            return METASTATEMENT.META_CLONE;
+        }
+        return null;
     }
 
     /**
@@ -107,10 +156,6 @@ public class DataBase {
                 command.command = STATEMENT.STATEMENT_PRINT;
                 yield PREPARERESULT.PREPARE_SUCCESS;
             }
-            case "save" -> {
-                command.command = STATEMENT.STATEMENT_SAVE;
-                yield PREPARERESULT.PREPARE_SUCCESS;
-            }
             default -> PREPARERESULT.PREPARE_UNRECOGNIZED_STATEMENT;
         };
     }
@@ -129,7 +174,6 @@ public class DataBase {
                     select(ROLES.which(new Scanner(System.in).nextLine())).forEach(System.out::println);
             case STATEMENT_DELETE, STATEMENT_UPDATE -> handleDeleteAndUpdate(command);
             case STATEMENT_PRINT -> printAll();
-            case STATEMENT_SAVE -> saveFile();
             default -> throw new IllegalStateException("Unexpected value: " + command);
         }
     }
@@ -195,19 +239,6 @@ public class DataBase {
                 System.out.println(user);
             }
         }
-    }
-
-    private void saveFile() {
-        FileSaver fileSaver = new FileSaver();
-        fileSaver.fileCreator(file);
-        for (User user : users) {
-            if (user != null) {
-                if (!fileSaver.fileWriter(user, file)) {
-                    System.err.printf("Could not save User %s%n", user);
-                }
-            }
-        }
-
     }
 
     /**
