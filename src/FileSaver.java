@@ -8,7 +8,7 @@ public class FileSaver {
      *
      * @return Returns if it was successful
      */
-    public boolean fileCreator(FileWrapper fileWrapper, String fileName) {
+    public boolean fileCreator() {
         String path;
         String separator = File.separator;
         String os = System.getProperty("os.name").toLowerCase();
@@ -28,10 +28,14 @@ public class FileSaver {
                     return false;
                 }
             }
-            File newFile = new File(path + separator + fileName + ".json");
-            fileWrapper.file = newFile;
-            return newFile.createNewFile();
-
+            if (isDirectoryEmpty(path)) {
+                File newFile = new File(path + separator + "db1.json");
+                return newFile.createNewFile();
+            } else {
+                int number = getHighestDataBaseNumber(path) + 1;
+                File newFile = new File(path + separator + "db" + number + ".json");
+                return newFile.createNewFile();
+            }
         } catch (IOException e) {
             System.err.println(e.getMessage());
             return false;
@@ -60,6 +64,11 @@ public class FileSaver {
                 }
             }
             File newFile = new File(path + separator + "tmp.json");
+            if (newFile.exists()) {
+                if (!newFile.delete()) {
+                    System.err.printf("Unable to delete file: %s%n", newFile.getAbsolutePath());
+                }
+            }
             fileWrapper.file = newFile;
             return newFile.createNewFile();
 
@@ -67,5 +76,46 @@ public class FileSaver {
             System.err.println(e.getMessage());
             return false;
         }
+    }
+
+    private boolean isDirectoryEmpty(String directoryPath) {
+        File directory = new File(directoryPath);
+
+        // Check if it is a directory
+        if (directory.isDirectory()) {
+            // List files in the directory
+            String[] files = directory.list();
+            // Return true if the directory is empty (list is null or has no files)
+            return files == null || files.length == 0;
+        } else {
+            System.out.println("Provided path is not a directory.");
+            return false;
+        }
+    }
+
+    private int getHighestDataBaseNumber(String directoryPath) {
+        File directory = new File(directoryPath);
+        int highestNumber = -1;
+        if (directory.isDirectory()) {
+            //list alls files with the correct name scheme
+            File[] files = directory.listFiles(((dir, name) -> name.matches("db[0-9]*[1-9].json")));
+            if (files != null) {
+                for (File file : files) {
+                    String fileName = file.getName();
+                    String numberPart = fileName.replaceAll("db", "").replaceAll(".json", "");
+                    try {
+                        int number = Integer.parseInt(numberPart);
+                        if (number > highestNumber) {
+                            highestNumber = number;
+                        }
+                    } catch (NumberFormatException e) {
+                        System.err.println("Error parsing number from file name: " + numberPart);
+                    }
+                }
+            }
+        } else {
+            System.out.println("Provided path is not a directory.");
+        }
+        return highestNumber;
     }
 }

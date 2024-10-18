@@ -17,11 +17,13 @@ public class DataBase {
     FileWrapper file = new FileWrapper(new File(""));
     FileManipulator fileManipulator = new FileManipulator();
 
+
     /**
      * Creates and runs the Database
      */
     public void start() {
         Scanner scanner = new Scanner(System.in);
+        createTMP(file);
         while (true) {
             printBuffer();
             String line = scanner.nextLine().trim();
@@ -96,6 +98,10 @@ public class DataBase {
                 file.file = fileManipulator.fileImport(line.substring(index + 1).trim());
             }
             case META_SAVE -> {
+                if (!fileManipulator.fileSave(file, users)) {
+                    System.err.printf("Message: %s is not a correct Path%n", line);
+                    return;
+                }
             }
             case META_CLONE -> {
             }
@@ -188,7 +194,10 @@ public class DataBase {
      */
     public void execute(CommandWrapper command, User user) {
         switch (command.command) {
-            case STATEMENT_DELETE -> users.remove(user);
+            case STATEMENT_DELETE -> {
+                users.remove(user);
+                deleteUser(user);
+            }
             case STATEMENT_PRINT -> System.out.println(user);
             case STATEMENT_UPDATE -> {
                 Scanner scanner = new Scanner(System.in);
@@ -241,6 +250,15 @@ public class DataBase {
                 System.out.println(user);
             }
         }
+    }
+
+
+    private boolean deleteUser(User user) {
+        if (!fileManipulator.deleteUser(user, file)) {
+            System.err.printf("Could not delete user '%s'%n", user);
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -298,6 +316,9 @@ public class DataBase {
         }
         users.add(user);
         System.out.printf("Inserted successfully: %s%n", user);
+        if (!fileManipulator.fileWriter(user, file)) {
+            System.err.printf("Could not write to file: %s%n", file);
+        }
     }
 
     /**
@@ -386,5 +407,16 @@ public class DataBase {
             }
         }
         return null;
+    }
+
+    private void createTMP(FileWrapper file) {
+        FileSaver fileSaver = new FileSaver();
+        if (!fileSaver.fileCreatorTMP(file)) {
+            System.err.println("Error creating tmp file");
+            System.exit(1);
+        }
+        if (!fileManipulator.fileWriter(file)) {
+            System.err.printf("Could not write to file: %s%n", file);
+        }
     }
 }
