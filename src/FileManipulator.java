@@ -1,5 +1,6 @@
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import wrapper.FileWrapper;
 
 import java.io.BufferedWriter;
 import java.io.File;

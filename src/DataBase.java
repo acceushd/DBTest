@@ -1,4 +1,6 @@
 import enums.*;
+import wrapper.CommandWrapper;
+import wrapper.FileWrapper;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -122,7 +124,7 @@ public class DataBase {
     }
 
     /**
-     * This function takes a line and a CommandWrapper as Inputs and gives the command the according
+     * This function takes a line and a wrapper.CommandWrapper as Inputs and gives the command the according
      * Statement
      *
      * @param line    This is where the actual command is in
