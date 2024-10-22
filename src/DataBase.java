@@ -3,9 +3,7 @@ import wrapper.CommandWrapper;
 import wrapper.FileWrapper;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -16,6 +14,7 @@ public class DataBase {
     ArrayList<User> users = new ArrayList<>();
     FileWrapper file = new FileWrapper(new File(""));
     FileManipulator fileManipulator = new FileManipulator();
+    ArrayList<TypedDynamicMap<Object, Object>> maps = new ArrayList<>();
 
 
     /**
@@ -164,10 +163,13 @@ public class DataBase {
                 command.command = STATEMENT.STATEMENT_PRINT;
                 yield PREPARERESULT.PREPARE_SUCCESS;
             }
+            case "create" -> {
+                command.command = STATEMENT.STATEMENT_CREATE;
+                yield PREPARERESULT.PREPARE_SUCCESS;
+            }
             default -> PREPARERESULT.PREPARE_UNRECOGNIZED_STATEMENT;
         };
     }
-
     /**
      * Executes the given command
      *
@@ -180,6 +182,11 @@ public class DataBase {
             case STATEMENT_SELECT -> handleSelect(line);
             case STATEMENT_SELECT_ROLE ->
                     select(ROLES.which(new Scanner(System.in).nextLine())).forEach(System.out::println);
+            case STATEMENT_CREATE -> {
+                if (!handleCreate(line)) {
+                    System.err.printf("Message: couldn't create %s", line);
+                }
+            }
             case STATEMENT_DELETE, STATEMENT_UPDATE -> handleDeleteAndUpdate(command);
             case STATEMENT_PRINT -> printAll();
             default -> throw new IllegalStateException("Unexpected value: " + command);
@@ -217,6 +224,33 @@ public class DataBase {
             }
         }
     }
+
+    private boolean handleCreate(String line) {
+        int index = line.indexOf("(");
+        int index2 = line.lastIndexOf(")");
+        String tableObjects = line.substring(index + 1, index2);
+        String[] objects = tableObjects.split(", ");
+        Class<?> keyType = objectClass(objects[0].substring(objects[0].indexOf(" ") + 1).toLowerCase());
+        Class<?> valueType = objectClass(objects[1].substring(objects[1].indexOf(" ") + 1).toLowerCase());
+        @SuppressWarnings("unchecked") TypedDynamicMap<Object, Object> map = new TypedDynamicMap<>((Class<Object>) keyType, (Class<Object>) valueType);
+        maps.add(map);
+        return true;
+    }
+
+    private Class<?> objectClass(String line) {
+        return switch (line) {
+            case "text" -> String.class;
+            case "integer" -> Integer.class;
+            case "boolean" -> Boolean.class;
+            case "double" -> Double.class;
+            case "float" -> Float.class;
+            case "long" -> Long.class;
+            case "char" -> Character.class;
+            case "byte" -> Byte.class;
+            default -> throw new IllegalStateException("Unexpected value: " + line);
+        };
+    }
+
 
     private void handleInsert(String line) {
         int index = line.indexOf(" ");
